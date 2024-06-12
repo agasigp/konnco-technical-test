@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\PaymentStoreRequest;
 use App\Models\Transaction;
 use Illuminate\Http\Request;
 
@@ -25,9 +26,21 @@ class PaymentController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(PaymentStoreRequest $request)
     {
-        //
+        $transaction = new Transaction();
+        $transaction->user_id = auth()->user()->id;
+        $transaction->amount = $request->amount;
+        $transaction->status = 'pending';
+        $transaction->save();
+
+        return response()
+            ->json(
+            [
+                'status' => 'OK',
+                'data' => []
+            ]
+            )->setStatusCode(201);
     }
 
     /**
