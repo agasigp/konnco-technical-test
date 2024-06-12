@@ -1,14 +1,17 @@
 <?php
 
-use App\Http\Controllers\PaymentController;
-use App\Http\Requests\PaymentStoreRequest;
-use App\Http\Requests\PaymentUpdateRequest;
 use App\Models\User;
+use App\Jobs\PaymentUpdate;
 use App\Models\Transaction;
 use Laravel\Passport\Passport;
+use Illuminate\Support\Facades\Queue;
+use App\Http\Requests\PaymentStoreRequest;
+use App\Http\Controllers\PaymentController;
+use App\Http\Requests\PaymentUpdateRequest;
 use JMac\Testing\Traits\AdditionalAssertions;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 
-uses(AdditionalAssertions::class);
+uses(AdditionalAssertions::class, RefreshDatabase::class);
 
 test('it shows list of transactions', function () {
     $user = User::factory()
@@ -82,6 +85,8 @@ test('it can update transaction with status completed/failed', function () {
         []
     );
 
+    Queue::fake();
+
     $response = $this->put(
         "/api/transactions/{$transaction->id}",
         [
@@ -96,12 +101,9 @@ test('it can update transaction with status completed/failed', function () {
             'data' => [],
         ]);
 
-    $this->assertDatabaseHas('transactions', [
-        'amount' => 1000000,
-        'status' => 'completed',
-        'user_id' => $user->id,
-        'id' => $transaction->id,
-    ]);
+    Queue::assertPushed(function (PaymentUpdate $job) use ($transaction) {
+        return $job->transaction->id === $transaction->id;
+    });
 
     $response = $this->put(
         "/api/transactions/{$transaction->id}",
@@ -117,12 +119,9 @@ test('it can update transaction with status completed/failed', function () {
             'data' => [],
         ]);
 
-    $this->assertDatabaseHas('transactions', [
-        'amount' => 500000,
-        'status' => 'failed',
-        'user_id' => $user->id,
-        'id' => $transaction->id,
-    ]);
+    Queue::assertPushed(function (PaymentUpdate $job) use ($transaction) {
+        return $job->transaction->id === $transaction->id;
+    });
 
     $this->assertActionUsesFormRequest(
         PaymentController::class,

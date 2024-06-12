@@ -2,10 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Transaction;
 use App\Http\Requests\PaymentStoreRequest;
 use App\Http\Requests\PaymentUpdateRequest;
-use App\Models\Transaction;
-use Illuminate\Http\Request;
+use App\Jobs\PaymentUpdate;
 
 class PaymentController extends Controller
 {
@@ -57,9 +57,11 @@ class PaymentController extends Controller
      */
     public function update(PaymentUpdateRequest $request, Transaction $transaction)
     {
-        $transaction->amount = $request->amount;
-        $transaction->status = $request->status;
-        $transaction->save();
+        PaymentUpdate::dispatch(
+            $transaction,
+            $request->amount,
+            $request->status
+        );
 
         return response()
             ->json(

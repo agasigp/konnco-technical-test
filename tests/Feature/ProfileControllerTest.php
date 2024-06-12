@@ -2,6 +2,9 @@
 
 use App\Models\User;
 use Laravel\Passport\Passport;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+
+uses(RefreshDatabase::class);
 
 test('a user can show his profile data', function () {
     $user = User::factory()->create();
