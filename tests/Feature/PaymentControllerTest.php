@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\PaymentController;
 use App\Http\Requests\PaymentStoreRequest;
+use App\Http\Requests\PaymentUpdateRequest;
 use App\Models\User;
 use App\Models\Transaction;
 use Laravel\Passport\Passport;
@@ -67,5 +68,65 @@ test('it can create new transsaction', function () {
         PaymentController::class,
         'store',
         PaymentStoreRequest::class
+    );
+});
+
+test('it can update transaction with status completed/failed', function () {
+    $user = User::factory()
+        ->has(Transaction::factory()->count(1))
+        ->create();
+    $transaction = $user->transactions[0];
+
+    Passport::actingAs(
+        $user,
+        []
+    );
+
+    $response = $this->put(
+        "/api/transactions/{$transaction->id}",
+        [
+            'amount' => 1000000,
+            'status' => 'completed'
+        ]
+    );
+
+    $response->assertStatus(200)
+        ->assertJson([
+            'status' => 'OK',
+            'data' => [],
+        ]);
+
+    $this->assertDatabaseHas('transactions', [
+        'amount' => 1000000,
+        'status' => 'completed',
+        'user_id' => $user->id,
+        'id' => $transaction->id,
+    ]);
+
+    $response = $this->put(
+        "/api/transactions/{$transaction->id}",
+        [
+            'amount' => 500000,
+            'status' => 'failed'
+        ]
+    );
+
+    $response->assertStatus(200)
+        ->assertJson([
+            'status' => 'OK',
+            'data' => [],
+        ]);
+
+    $this->assertDatabaseHas('transactions', [
+        'amount' => 500000,
+        'status' => 'failed',
+        'user_id' => $user->id,
+        'id' => $transaction->id,
+    ]);
+
+    $this->assertActionUsesFormRequest(
+        PaymentController::class,
+        'update',
+        PaymentUpdateRequest::class
     );
 });

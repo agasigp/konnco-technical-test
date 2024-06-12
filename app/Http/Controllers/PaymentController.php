@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\PaymentStoreRequest;
+use App\Http\Requests\PaymentUpdateRequest;
 use App\Models\Transaction;
 use Illuminate\Http\Request;
 
@@ -36,10 +37,10 @@ class PaymentController extends Controller
 
         return response()
             ->json(
-            [
-                'status' => 'OK',
-                'data' => []
-            ]
+                [
+                    'status' => 'OK',
+                    'data' => []
+                ]
             )->setStatusCode(201);
     }
 
@@ -54,9 +55,19 @@ class PaymentController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, Transaction $transaction)
+    public function update(PaymentUpdateRequest $request, Transaction $transaction)
     {
-        //
+        $transaction->amount = $request->amount;
+        $transaction->status = $request->status;
+        $transaction->save();
+
+        return response()
+            ->json(
+                [
+                    'status' => 'OK',
+                    'data' => []
+                ]
+            );
     }
 
     /**
