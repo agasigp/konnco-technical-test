@@ -48,8 +48,6 @@ test('a user failed login with wrong username or password', function () {
         ]
     );
 
-    $response->dump();
-
     $response
         ->assertStatus(401)
         ->assertJson([
