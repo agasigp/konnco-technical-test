@@ -10,6 +10,13 @@ class Transaction extends Model
 {
     use HasFactory;
 
+    protected function casts(): array
+    {
+        return [
+            'amount' => 'float',
+        ];
+    }
+
     public function user() : BelongsTo {
         return $this->belongsTo(User::class);
     }
