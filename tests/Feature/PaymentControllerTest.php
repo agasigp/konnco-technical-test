@@ -157,6 +157,35 @@ test('it can update transaction with status completed/failed', function () {
     );
 });
 
+test('it can not edit transaction of other user', function () {
+    $user = User::factory()->create();
+    $user2 = User::factory()
+        ->has(Transaction::factory()->count(1))
+        ->create();
+
+    Passport::actingAs(
+        $user,
+        []
+    );
+
+    $response = $this->withHeaders([
+        'Accept' => 'application/json',
+    ])->put(
+        "/api/transactions/{$user2->transactions[0]->id}",
+        [
+            'amount' => 1000000,
+            'status' => 'completed'
+        ]
+    );
+
+    $response->dump();
+
+    $response->assertStatus(403)
+        ->assertJson([
+            'message' => 'This action is unauthorized.',
+        ]);
+});
+
 test('it shows summary of transactions', function () {
     $user = User::factory()
         ->has(
