@@ -2,11 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Jobs\PaymentUpdate;
 use App\Models\Transaction;
+use Illuminate\Support\Facades\Cache;
 use App\Http\Requests\PaymentStoreRequest;
 use App\Http\Requests\PaymentUpdateRequest;
-use App\Jobs\PaymentUpdate;
-use Illuminate\Support\Facades\Cache;
 
 class PaymentController extends Controller
 {

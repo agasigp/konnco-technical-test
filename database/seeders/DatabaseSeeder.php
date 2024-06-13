@@ -2,7 +2,6 @@
 
 namespace Database\Seeders;
 
-use App\Models\Transaction;
 use App\Models\User;
 use Illuminate\Database\Seeder;
 
@@ -13,13 +12,9 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        User::factory()
-            ->count(1000)
-            ->has(Transaction::factory()->sequence(
-                ['status' => 'pending'],
-                ['status' => 'completed'],
-                ['status' => 'failed'],
-            )->count(10))
-            ->create();
+        User::factory()->create([
+            'email' => 'user@konnco.com',
+            'password' => bcrypt('password')
+        ]);
     }
 }

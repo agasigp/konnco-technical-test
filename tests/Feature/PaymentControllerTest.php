@@ -178,8 +178,6 @@ test('it can not edit transaction of other user', function () {
         ]
     );
 
-    $response->dump();
-
     $response->assertStatus(403)
         ->assertJson([
             'message' => 'This action is unauthorized.',
