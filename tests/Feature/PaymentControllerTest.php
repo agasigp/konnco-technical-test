@@ -129,3 +129,50 @@ test('it can update transaction with status completed/failed', function () {
         PaymentUpdateRequest::class
     );
 });
+
+test('it shows summary of transactions', function () {
+    $user = User::factory()
+        ->has(
+            Transaction::factory()
+                ->sequence(
+                    ['status' => 'pending', 'amount' => 500000],
+                    ['status' => 'pending', 'amount' => 1000000],
+                    ['status' => 'completed', 'amount' => 1500000],
+                    ['status' => 'completed', 'amount' => 2000000],
+                    ['status' => 'failed', 'amount' => 1000000],
+                )
+                ->count(5)
+        )
+        ->create();
+
+    $lowestTransaction = json_decode($user->transactions[0]->toJson(), true);
+    $highestTransaction = json_decode($user->transactions[3]->toJson(), true);
+
+    Passport::actingAs(
+        $user,
+        []
+    );
+
+    $response = $this->withHeaders([
+        'Accept' => 'application/json',
+    ])
+        ->get(
+            '/api/transactions/summary',
+        );
+
+    $response->assertStatus(200)
+        ->assertJson([
+            'status' => 'OK',
+            'data' => [
+                "total_transactions" => 5,
+                "average_amount" => 1200000,
+                "highest_transaction" => $highestTransaction,
+                "lowest_transaction" => $lowestTransaction,
+                "status_distribution" => [
+                    "pending" => 2,
+                    "completed" => 2,
+                    "failed" => 1,
+                ],
+            ],
+        ]);
+});
