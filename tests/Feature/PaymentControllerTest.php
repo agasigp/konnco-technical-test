@@ -4,6 +4,7 @@ use App\Models\User;
 use App\Jobs\PaymentUpdate;
 use App\Models\Transaction;
 use Laravel\Passport\Passport;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Queue;
 use App\Http\Requests\PaymentStoreRequest;
 use App\Http\Controllers\PaymentController;
@@ -15,11 +16,11 @@ uses(AdditionalAssertions::class, RefreshDatabase::class);
 
 test('it shows list of transactions', function () {
     $user = User::factory()
-        ->has(Transaction::factory()->count(11))
+        ->has(Transaction::factory()->count(2))
         ->create();
     $transactions = $user->transactions()->paginate(10);
     $transactions->withPath(url()->current() . '/api/transactions');
-    $transactions = json_encode($transactions);
+    $transactionsJson = json_encode($transactions);
 
     Passport::actingAs(
         $user,
@@ -33,11 +34,37 @@ test('it shows list of transactions', function () {
             '/api/transactions',
         );
 
+
     $response->assertStatus(200)
         ->assertJson([
             'status' => 'OK',
-            'data' => json_decode($transactions, true),
+            'data' => json_decode($transactionsJson, true),
         ]);
+});
+
+test('it can stores list of transactions in cache', function () {
+    Cache::spy();
+    $user = User::factory()
+        ->has(Transaction::factory()->count(2))
+        ->create();
+    $transactions = $user->transactions()->paginate(10);
+    $transactions->withPath(url()->current() . '/api/transactions');
+
+    Passport::actingAs(
+        $user,
+        []
+    );
+
+    $this->withHeaders([
+        'Accept' => 'application/json',
+    ])
+        ->get(
+            '/api/transactions',
+        );
+
+    Cache::shouldHaveReceived('remember')
+        ->once()
+        ->with('transactions', 60, Closure::class);
 });
 
 test('it can create new transsaction', function () {

@@ -6,6 +6,7 @@ use App\Models\Transaction;
 use App\Http\Requests\PaymentStoreRequest;
 use App\Http\Requests\PaymentUpdateRequest;
 use App\Jobs\PaymentUpdate;
+use Illuminate\Support\Facades\Cache;
 
 class PaymentController extends Controller
 {
@@ -14,7 +15,9 @@ class PaymentController extends Controller
      */
     public function index()
     {
-        $transactions = auth()->user()->transactions()->paginate(10);
+        $transactions = Cache::remember('transactions', 60, function () {
+            return auth()->user()->transactions()->paginate(10);
+        });
 
         return response()->json(
             [
