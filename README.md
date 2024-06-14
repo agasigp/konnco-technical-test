@@ -39,9 +39,12 @@ Aplikasi ini dapat diinstal pada server lokal maupun online dengan spesifikasi b
     PASSPORT_PERSONAL_ACCESS_CLIENT_ID=client-id
     PASSPORT_PERSONAL_ACCESS_CLIENT_SECRET=client-secret
     ```
-10. Mulai server: `$ php artisan serve`
-11. Untuk akses dokumentasi api, bisa diakses di [https://dark-star-572981.postman.co/workspace/My-Workspace~01171ba4-cc62-4394-8a03-f59cd594a3b0/collection/398070-8c9abd9a-fdee-434f-92ff-26261d673617?action=share&creator=398070](https://dark-star-572981.postman.co/workspace/My-Workspace~01171ba4-cc62-4394-8a03-f59cd594a3b0/collection/398070-8c9abd9a-fdee-434f-92ff-26261d673617?action=share&creator=398070). Alternatif lain bisa import postman collection yang tersedia di repo ini. User yang bisa dipakai adalah `user@konnco.com` / `password`
-12. Untuk testing, salin berkas `.env` ke `.env.testing`: `$ cp .env .env.testing`. Sesuaikan isi berkas .env.testing dengan konfigurasi yang sesuai. Berikut ini adalah beberapa hal yang perlu diganti untuk kebutuhan testing :
+10. Generate the encryption key for passport : `$ php artisan passport:keys`.
+11. Mulai server: `$ php artisan serve`
+12. Untuk akses dokumentasi api, bisa diakses di [https://dark-star-572981.postman.co/workspace/My-Workspace~01171ba4-cc62-4394-8a03-f59cd594a3b0/collection/398070-8c9abd9a-fdee-434f-92ff-26261d673617?action=share&creator=398070](https://dark-star-572981.postman.co/workspace/My-Workspace~01171ba4-cc62-4394-8a03-f59cd594a3b0/collection/398070-8c9abd9a-fdee-434f-92ff-26261d673617?action=share&creator=398070). Alternatif lain bisa import postman collection yang tersedia di repo ini. User yang bisa dipakai adalah `user@konnco.com` / `password`.
+13. Untuk seeder 1000 user dengan 100 transaksi untuk masing-masing user, silahkan jalankan perintah berikut : `$ php artisan db:seed --class=UserSeeder`.
+14. Untuk menjalankan queue:worker supaya fungsi queue bisa berjalan, silahkan jalankan perintah berikut : `$ php artisan queue:work`.
+15. Untuk testing, salin berkas `.env` ke `.env.testing`: `$ cp .env .env.testing`. Sesuaikan isi berkas .env.testing dengan konfigurasi yang sesuai. Konfigurasi di `.env.testing` akan dipakai untuk testing. Berikut ini adalah beberapa hal yang perlu diganti untuk kebutuhan testing :
     ```
     APP_ENV=testing
     CACHE_STORE=array
